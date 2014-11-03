@@ -3,3 +3,6 @@ data/
 
 # Ignore mac files
 .DS_Store
+
+# Ignore the MATLAB autosave files
+*.m~
