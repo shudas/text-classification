@@ -1,6 +1,6 @@
-image-calendar
-==============
+text-classification
+===================
 
-EECS 445 Project. Solution for the following Kaggle Project: https://www.kaggle.com/c/tradeshift-text-classification
+EECS 445 Project.
 
-Program that correctly predicts the probability that a piece of text belongs to a given class (e.g. Date, Author, Address, etc.)
+Program that correctly predicts the class of a given piece of text (e.g. Date, Author, Address, etc.)
