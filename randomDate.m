@@ -41,49 +41,73 @@ dayType = find(ismember(datePortion, DAYS_FORMAT), 1);
 monthType = find(ismember(datePortion, MONTHS_FORMAT), 1);
 dateType = find(ismember(datePortion, DATES_FORMAT), 1);
 yearType = find(ismember(datePortion, YEARS_FORMAT));
-
-if (~isempty(dayType))
-    finalDate = strcat(finalDate, datestr(randDate, datePortion{dayType}));
-    finalDate = strcat(finalDate, DAY_SEP{randi(length(DAY_SEP))}, {' '});
-end
-
 dateSep = '';
+
+day = '';
+if (~isempty(dayType))
+    day = datestr(randDate, datePortion{dayType});
+    day = char(strcat(day, DAY_SEP{randi(length(DAY_SEP))}, {' '}));
+end
+date = '';
+if (~isempty(dateType))
+    date = datestr(randDate, datePortion{dateType});
+%     dont use leading zero for numerical dates
+    if (~isempty(str2num(date)))
+        date = num2str(str2num(date));
+    end
+end
+month = '';
 if (~isempty(monthType))
-%     if month and date are both numbers, use a date separator
-    mTypeVal = datePortion{monthType};
-    if (~isempty(dateType))
-        format = mTypeVal;
-        dTypeVal = datePortion{dateType};
-        if (strcmp(mTypeVal, 'mm'))
-            dateSep = DATE_SEP{randi(length(DATE_SEP))};
-            format = strcat(mTypeVal, dateSep, dTypeVal);
-            finalDate = strcat(finalDate, datestr(randDate, format));
-        else
-%             indicates whether to use 'th' after date. 1/5 times we dont
-%             use th.
-            useTh = randi(5);
-            dateFormat = dTypeVal;
-            if (useTh > 1)
-               dateFormat = strcat(dateFormat, 'th');
-            end
-%             one of 8 times we will use something like 12th Oct
-            if (randi(8) == 1)
-                format = char(strcat(dateFormat, {' '}, mTypeVal))
-                finalDate = strcat(finalDate, datestr(randDate, format));
-            else
-                format = char(strcat(mTypeVal, DAY_SEP{randi(length(DAY_SEP))}, {' '}, dateFormat))
-                finalDate = strcat(finalDate, datestr(randDate, format));
-            end
-            finalDate = strcat(finalDate, DAY_SEP{randi(length(DAY_SEP))}, {' '});
-        end        
+    month = datestr(randDate, datePortion{monthType});
+end
+year = '';
+if (~isempty(yearType))
+%     if there is no month or no date, then use yyyy
+    if (strcmp(month, '') || strcmp(date, ''))
+        year = datestr(randDate, 'yyyy');
     else
-        finalDate = strcat(finalDate, datestr(randDate, mTypeVal));
-        finalDate = strcat(finalDate, DAY_SEP{randi(length(DAY_SEP))}, {' '});
+        year = datestr(randDate, datePortion{yearType}); 
     end
     
-    
 end
 
+monthDay = '';
+% if month and date are both numbers, use a date separator
+if (~isempty(str2num(month)) && ~isempty(str2num(date)))
+    dateSep = DATE_SEP{randi(length(DATE_SEP))};
+    monthDay = char(strcat(num2str(str2num(month)), dateSep, date));
+else
+%     concatenate month and day in random order
+%     indicates whether to use 'th' after date. 1/5 times we dont use th.
+    if (~strcmp(date, ''))
+        useTh = randi(5);
+        if (useTh > 1)
+            date = strcat(date, 'th');
+        end
+        monthDay = date;
+    end
+    if (~strcmp(month, ''))
+        %     one of 8 times we will put date before month
+        month = strcat(month, DAY_SEP{randi(length(DAY_SEP))});
+        monthDay = month;
+        if (~strcmp(date, ''))
+            if (randi(8) == 1 && ~strcmp(date, ''))
+                monthDay = strcat(date, {' '}, month);
+            else
+                monthDay = strcat(month, {' '}, date);
+            end
+        end
+        
+    end
+    if (~strcmp(monthDay, ''))
+        monthDay = char(strcat(monthDay, {' '}));
+    end    
+end
+% add the separator b/t month day and year if 
+if (~strcmp(dateSep, '') && ~strcmp(year, ''))
+   year = strcat(dateSep, year);
+end
+finalDate = char(strcat({day}, {monthDay}, {year}));
 date_time = finalDate;
 
 end
