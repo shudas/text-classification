@@ -1,7 +1,7 @@
-function [ date_time ] = randomDate( datetime_params )
+function [ ret_date ] = randomDate( datetime_params )
 %randomDate Generates a random date string given the desired parts of the
-%date. datetime_params is a string containing y, m, d, D, H, M, or a
-%standing for year, month, day, date, hour, minute, am/pm respectively.
+%date. datetime_params is a string containing y, m, d, D
+%standing for year, month, day, and date respectively.
 
 YEARS_FORMAT = {'yyyy', 'yy'};
 MONTHS_FORMAT = {'mmmm', 'mmm', 'mm'};
@@ -34,8 +34,6 @@ end
 finalDate = '';
 % generate a random date
 randDate = getRandDate();
-
-datePortion
 
 dayType = find(ismember(datePortion, DAYS_FORMAT), 1);
 monthType = find(ismember(datePortion, MONTHS_FORMAT), 1);
@@ -108,7 +106,7 @@ if (~strcmp(dateSep, '') && ~strcmp(year, ''))
    year = strcat(dateSep, year);
 end
 finalDate = char(strcat({day}, {monthDay}, {year}));
-date_time = finalDate;
+ret_date = finalDate;
 
 end
 
@@ -118,3 +116,4 @@ function [ randDate ] = getRandDate( )
     MIN_TIME = 1998*365;
     randDate = datevec(randi([MIN_TIME MAX_TIME]));
 end
+

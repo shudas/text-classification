@@ -31,6 +31,9 @@ fclose(dictFile);
 
 docs = cell(num_to_generate, 1);
 
+% use different rand num gen every time
+rng('shuffle');
+
 for i = 1:num_to_generate
     docLines = MIN_OPTIMAL_LINES;
     maxOrOpt = randi([1 OPT_VS_EXTREME]);
@@ -46,9 +49,48 @@ for i = 1:num_to_generate
        wordIndices = randperm(length(dict{1}), numWords);
        doc{j} = strjoin(dict{1}(wordIndices)');
     end
-%     populate doc with random words and date and time
+%     populate doc with random date and time
+    date = generateDate();
+    time = generateTime();
+    dateTimeLines = [];
+%     some times, separate date and time into different spots
+    if (randi(8) == 1 && docLines > 10)
+%         select random lines for date and time locations
+        dateTimeLines = randperm(docLines, 2);
+        doc{dateTimeLines(1)} = date;
+        doc{dateTimeLines(2)} = time;
+    else
+        dateTimeLines = repmat(randi(docLines), 1, 2);
+        doc{dateTimeLines(1)} = char(strcat(date, {'    '}, time));
+    end
     docs{i} = doc;
 end
 
+end
+
+function [ date ] = generateDate( )
+    combs = ['d', 'mD', 'dmD', 'dmDy'];
+%     use day, month, date most frequently, then dmDy, then mD, then d
+    choice = randi(16);
+    if (choice == 16)
+        date = randomDate('d');
+    elseif (choice > 12)
+        date = randomDate('mD');
+    elseif (choice > 7)
+        date = randomDate('dmD');
+    else
+        date = randomDate('dmDy');
+    end
+end
+
+function [ time ] = generateTime( )
+    combs = ['HA', 'HMA'];
+%     use Hour and AM/PM more frequently than time with minutes
+    choice = randi(16);
+    if (choice == 16)
+        time = randomTime('HMA');
+    else
+        time = randomTime('HA');
+    end
 end
 
