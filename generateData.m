@@ -1,4 +1,4 @@
-function [ docs ] = generateData( num_to_generate )
+function [ docs, labels ] = generateData( num_to_generate )
 %generateData Generates fake text with date and time strings inside the
 %text.
 %   Generates num_to_generate arrays of text. Each array can be thought of
@@ -21,8 +21,7 @@ OPT_VS_EXTREME = 4;
 MIN_WORDS_PER_LINE = 2;
 MAX_WORDS_PER_LINE = 10;
 
-% Features:
-NUM_FEATURES = 1;
+DATE_TIME_SEP = {'   ', ' @ ', ' | '};
 
 % open up dictionary of words for filler text
 dictFile = fopen('dictionary.txt', 'r');
@@ -30,6 +29,7 @@ dict = textscan(dictFile, '%s');
 fclose(dictFile);
 
 docs = cell(num_to_generate, 1);
+labels = cell(num_to_generate, 1);
 
 % use different rand num gen every time
 rng('shuffle');
@@ -53,17 +53,24 @@ for i = 1:num_to_generate
     date = generateDate();
     time = generateTime();
     dateTimeLines = [];
+    label = zeros(docLines, 1);
 %     some times, separate date and time into different spots
-    if (randi(8) == 1 && docLines > 10)
+    if (randi(2) == 1 && docLines > 10)
 %         select random lines for date and time locations
         dateTimeLines = randperm(docLines, 2);
         doc{dateTimeLines(1)} = date;
         doc{dateTimeLines(2)} = time;
+%         1 means date label 2 means time label
+        label(dateTimeLines(1)) = 1;
+        label(dateTimeLines(2)) = 2;
     else
         dateTimeLines = repmat(randi(docLines), 1, 2);
-        doc{dateTimeLines(1)} = char(strcat(date, {'    '}, time));
+        doc{dateTimeLines(1)} = char(strcat(date, {DATE_TIME_SEP{randi(length(DATE_TIME_SEP))}}, time));
+%         3 means both date and time
+        label(dateTimeLines(1)) = 3;
     end
     docs{i} = doc;
+    labels{i} = label;
 end
 
 end
