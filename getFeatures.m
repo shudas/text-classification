@@ -1,4 +1,4 @@
-function [ output_args ] = getFeatures( docs, labels )
+function [ feats ] = getFeatures( docs, labels )
 %getFeatures Creates features from the given data. 
 %   docs should be a cell array of cell arrays. The inner cell array is a
 %   document and the outer one is a list of all the documents. labels
@@ -10,8 +10,6 @@ NUM_FEATS = 3;
 MAX_LINES = max(cellfun(@length, docs));
 feats = zeros(length(docs), MAX_LINES, NUM_FEATS);
 
-
-
 for i=1:length(docs)
     for j = 1:length(docs{i})
 %         if line contains day expr, set the 1st val of innermost to 1
@@ -19,7 +17,7 @@ for i=1:length(docs)
 %         if line contains date expr, set the 2nd val of innermost to 1
 
 %         if line contains time expr, set the 3rd val of innermost to 1
-
+        feats(i,j,3) = checkTimeExpr(docs{i}{j});
     end
 end
 end
