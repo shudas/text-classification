@@ -4,7 +4,7 @@ function [ accuracy ] = runMultinomialLogistic( trainSize, testSize )
 %provided, they default to 500 and 50 respectively.
 
 if (nargin == 0)
-    trainSize = 500;
+    trainSize = 100;
     testSize = 50;
 end
 

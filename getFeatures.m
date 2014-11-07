@@ -1,4 +1,5 @@
 function [ feats, labels_mat ] = getFeatures( docs, labels )
+addpath('libraries/strnearest/');
 %getFeatures Creates features from the given data. 
 %   docs should be a cell array of cell arrays. The inner cell array is a
 %   document and the outer one is a list of all the documents. labels
@@ -18,13 +19,9 @@ for i=1:length(docs)
         if (i > 1)
             offset = sum(cellfun(@length, docs(1:i-1)));
         end
-%         if line contains day expr, set the 1st val of innermost to 1
-        
-%         if line contains date expr, set the 2nd val of innermost to 1
-
-%         if line contains time expr, set the 3rd val of innermost to 1
 %         feats(i,j,3) = checkTimeExpr(docs{i}{j});
         feats(offset + j, 1) = checkTimeExpr(docs{i}{j});
+        feats(offset + j, 2) = checkDayExpr(docs{i}{j});
     end
 end
 
@@ -57,6 +54,69 @@ function [ weight ] = checkTimeExpr(val_to_check)
         end
     end
     weight = 1;
+end
+
+function [ weight ] = checkDayExpr(val_to_check)
+    assert(ischar(val_to_check));
+    weight = 1;
+    dayMonths = textread('days.csv', '%s', 'delimiter', '\n');
+    days = strsplit(dayMonths{1});
+    months = strsplit(dayMonths{2});
+    valCell = strsplit(val_to_check);
+%     find nearest matching string using Levenshtein dist
+%     minD = 1000000000;
+%     for i=1:length(valCell)
+%         id = 1000000000;
+%         dist = 1000000000;
+%         if i==1
+%             [id, dist] = strnearest(days, {valCell{i}}, 'case');
+%         else
+%             disp('YO');
+%             [id, dist] = strnearest(days, {valCell{i}}, minD, 'case');
+%         end
+%         if dist < minD
+%             minD = dist;
+%         end
+%     end
+    [id, dist] = strnearest(days, valCell, 'case');
+%     find word with smallest distance
+    [minDist, index] = min(dist);
+%     set first part of weight as 1/dist. If small dist, then word is close to match
+%     avoid divide by 0 error. weight will be 1/dist so perfect match ->
+%     weight = 1/2
+    if (minDist == 0)
+        minDist = 1/2;
+    end
+    weight = weight + 1/minDist;
+%     weight(1) = 1/minDist;
+%     do same thing for month
+    [id, dist] = strnearest(months, valCell, 'case');
+    [minDist, index] = min(dist);
+    if (minDist == 0)
+        minDist = 1/2;
+    end
+%     weight(2) = 1/minDist;
+    weight = weight + 1/minDist;
+
+%     regexps for classifying date. Goes from most strict to least strict
+%     ##(sep)##(sep)##(##)
+    dateExp1 = '((\d)|(\d\d))*((\d)|(\d\d))*((\d\d)|(\d\d\d\d))';
+%     optional year
+    dateExp2 = '((\d)|(\d\d))*((\d)|(\d\d))';
+%     only date present
+    timeExp3 = '((\d)|(\d\d))';
+%     matrix of all expressions
+    EXPS = {'((\d)|(\d\d))*((\d)|(\d\d))*((\d\d)|(\d\d\d\d))';...
+        '((\d)|(\d\d))*((\d)|(\d\d))';...
+        '((\d)|(\d\d))'};
+    
+    for i=1:length(EXPS)
+%         the most strict match has highest weight
+        if (regexp(val_to_check, EXPS{i}))
+            weight = weight + ((length(EXPS) - i) + 1);
+            return;
+        end
+    end
 end
 
 function[ labels_mat ] = convertLabels(labels_cell)
