@@ -7,23 +7,21 @@ function[docs labels] = readFiles(docFolder, labelFolder)
 docNames = dir(docFolder);
 labelNames = dir(labelFolder);
 
-docs = [];
-labels = [];
+docs = {};
+labels = {};
+
+counter = 1;
+
 for i = 1:length(docNames)
     if length(strfind(docNames(i).name, '.txt')) > 0
         fd = fopen(strcat(docFolder,'/',docNames(i).name));
         fl = fopen(strcat(labelFolder,'/',labelNames(i).name));
-        
-        dline = fgets(fd);
-        lline = fgets(fl);
-        while ischar(dline)
-            docs = [docs; cellstr(dline)];
-            labels = [labels; cellstr(lline)];
-            labels{end} = str2num(labels{end});
-            dline = fgets(fd);
-            lline = fgets(fl);
-        end
-
+        txt = textscan(fd, '%s', 'delimiter', '\n');
+        docs{counter} = txt{1};
+        labels{counter} = fscanf(fl, '%d');
+%         for now, just use the date and time labels
+        labels{counter}(labels{counter} > 3) = 0;
+        counter = counter + 1;
         fclose(fd);
         fclose(fl);
     end

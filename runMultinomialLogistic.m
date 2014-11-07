@@ -11,7 +11,7 @@ end
 [trainDocs, trainDocsLabels] = generateData(trainSize);
 [trainFeats, trainLabels] = getFeatures(trainDocs, trainDocsLabels);
 
-logFit = mnrfit(trainFeats, trainLabels);
+logFit = mnrfit(trainFeats, trainLabels)
 
 [testDocs, testDocsLabels] = generateData(testSize);
 [testFeats, testLabels] = getFeatures(testDocs, testDocsLabels);
