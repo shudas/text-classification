@@ -1,24 +1,91 @@
-function [ connWords ] = combineRegions( ocrText )
-%combineRegions Combines regions from ocrText that are in close proximity
-%   The regions of the ocrText input are combined. This combination happens
+function [ connWords, combBoxes ] = combineRegions( words, boxes, maxWidth, maxHeight, onWords )
+%combineRegions Combines regions for text that is in close proximity
+%   The regions specified by boxes are combined. This combination happens
 %   horizontally. If two regions are in close proximity horizontally, then
 %   the regions and the words associated with the regions are combined with
 %   a space delimiter.
-boxes = ocrText.WordBoundingBoxes;
+
+% assert(length(boxes) == length(words));
 connWords = {};
+combBoxes = [];
+
+if (onWords == 1)
+
+    connIdx = 1;
+    for i = 1:length(boxes) - 1
+    %     add word for new line
+        if (length(connWords) < connIdx)
+            connWords(connIdx) = words(i);
+        end
+        if (containsEachOther(boxes(i, :), boxes(i + 1, :)))
+            connWords(connIdx) = strcat(connWords(connIdx), {' '}, words(i+1));
+        elseif (length(connWords) == connIdx)
+            connIdx = connIdx + 1;
+        end
+    end
+    return;
+
+end
+
+% just for returning now. Code below is for all boxes not just from ocr
+% if 1==1
+%     return;
+% end
+
+for i = 1:length(boxes)
+    boxes(i, :) = addLeeway(boxes(i, :), maxWidth, maxHeight);
+end
+
+checkedBoxes = zeros(size(boxes, 1), 1);
 connIdx = 1;
 for i = 1:length(boxes) - 1
-%     add word for new line
-    if (length(connWords) < connIdx)
-        connWords(connIdx) = ocrText.Words(i);
+    if (checkedBoxes(i) == 1)
+        continue;
     end
-    if (containsEachOther(boxes(i, :), boxes(i + 1, :)))
-        connWords(connIdx) = strcat(connWords(connIdx), {' '}, ocrText.Words(i+1));
-    elseif (length(connWords) == connIdx)
-        connIdx = connIdx + 1;
+%     add box for new line
+%     if (length(combBoxes) < connIdx)
+%         'yo'
+    combBoxes(connIdx, :) = boxes(i, :);
+    checkedBoxes(i) = 1;
+%     end
+    for j = i+1:length(boxes)
+        if (containsEachOther(combBoxes(connIdx, :), boxes(j, :)))
+            combBoxes(connIdx, :) = combineBoxes(combBoxes(connIdx,:), boxes(j,:));
+            checkedBoxes(j) = 1;
+        end
+    end
+    connIdx = connIdx + 1;
+end
+
+end
+
+function [ box ] = addLeeway( region, maxWidth, maxHeight )
+    mult = 0.10;
+    box(1) = max(region(1) - (mult*region(4)), 1);
+    box(2) = max(region(2) - (mult*region(4)), 1);
+    box(3) = region(3) + (2*mult*region(4));
+    box(4) = region(4) + (2*mult*region(4));
+    if (box(1) + box(3) > maxWidth)
+        box(3) = maxWidth - box(1);
+    end
+    if (box(2) + box(4) > maxHeight)
+        box(4) = maxHeight - box(2);
     end
 end
 
+function [ box ] = combineBoxes( region1, region2 )
+    if (region1(1) ~= region2(1))
+        larger = max(region1(1), region2(1));
+        if (region1(1) == larger)
+            box = combineBoxes(region2, region1);
+            return;
+        end
+    end
+    left = region1(1);
+    up = max(region1(2), region2(2));
+    right = max(region1(1) + region1(3), region2(1) + region2(3));
+    bottom = max(region1(2) + region1(4), region2(2) + region2(4));
+    box = [ left, up, right - left, bottom - up ];
 end
 
 function [ contained ] = containsEachOther( region1, region2 )
