@@ -17,7 +17,7 @@ if (onWords == 1)
         if (length(connWords) < connIdx)
             connWords(connIdx) = words(i);
         end
-        if (containsEachOther(boxes(i, :), boxes(i + 1, :)))
+        if (containsEachOther(boxes(i, :), boxes(i + 1, :), maxWidth))
             connWords(connIdx) = strcat(connWords(connIdx), {' '}, words(i+1));
         elseif (length(connWords) == connIdx)
             connIdx = connIdx + 1;
@@ -49,7 +49,7 @@ for i = 1:length(boxes) - 1
     checkedBoxes(i) = 1;
 %     end
     for j = i+1:length(boxes)
-        if (containsEachOther(combBoxes(connIdx, :), boxes(j, :)))
+        if (containsEachOther(combBoxes(connIdx, :), boxes(j, :), maxWidth))
             combBoxes(connIdx, :) = combineBoxes(combBoxes(connIdx,:), boxes(j,:));
             checkedBoxes(j) = 1;
         end
@@ -88,12 +88,12 @@ function [ box ] = combineBoxes( region1, region2 )
     box = [ left, up, right - left, bottom - up ];
 end
 
-function [ contained ] = containsEachOther( region1, region2 )
+function [ contained ] = containsEachOther( region1, region2, maxWidth )
 %     find the larger region vertically speaking
     if (region1(4) ~= region2(4))
         larger = max(region1(4), region2(4));
         if (region2(4) == larger)
-            contained = containsEachOther(region2, region1);
+            contained = containsEachOther(region2, region1, maxWidth);
             return;
         end
     end
@@ -106,15 +106,18 @@ function [ contained ] = containsEachOther( region1, region2 )
     if (up > region1(2) || down < region1(2) + region1(4))
         return;
     end
-    contained = horizontallyClose(region1, region2);
+    contained = horizontallyClose(region1, region2, maxWidth);
 end
 
-function [ close ] = horizontallyClose( region1, region2 )
+function [ close ] = horizontallyClose( region1, region2, maxWidth )
+% after analyzing images it seems like the minimum width for a significant symbol
+% like '-' is about 0.01 of the image size
+minWidthFactor = 0.01;
 %     find the leftmost region
     if (region1(1) ~= region2(1))
         larger = max(region1(1), region2(1));
         if (region1(1) == larger)
-            close = horizontallyClose(region2, region1);
+            close = horizontallyClose(region2, region1, maxWidth);
             return;
         end
     end
@@ -123,7 +126,8 @@ function [ close ] = horizontallyClose( region1, region2 )
 %     check that right region starts no later than a multiple of the width of a
 %     word. Right now word width = word height
     right = region1(1) + region1(3);
-    if (region2(1) < right + region1(4))
+    width = max(region1(4), maxWidth * minWidthFactor);
+    if (region2(1) < right + width)
         close = true;
     end
 end

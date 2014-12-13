@@ -8,16 +8,13 @@ if (nargin == 0)
     testSize = 50;
 end
 
-[trainDocs, trainDocsLabels] = generateData(trainSize);
-[trainFeats, trainLabels] = getFeatures(trainDocs, trainDocsLabels);
-
-logFit = mnrfit(trainFeats, trainLabels)
+logfit = train(trainSize);
 
 [testDocs, testDocsLabels] = generateData(testSize);
-[testFeats, testLabels] = getFeatures(testDocs, testDocsLabels);
-
+[testFeats] = getFeatures(testDocs);
+testLabels = convertLabels(testDocsLabels);
 testPred = mnrval(logFit, testFeats);
-[maxProb, predLabel] = max(testPred, [], 2);
+[~, predLabel] = max(testPred, [], 2);
 numWrong = sum(predLabel - testLabels ~= 0);
 accuracy = 1 - (numWrong / length(testLabels));
 

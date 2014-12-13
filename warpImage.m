@@ -4,6 +4,7 @@ function [ warped, newCorners ] = warpImage( image )
 %   Teja Muppirala on http://www.mathworks.com/matlabcentral/answers/66123-matlab-find-the-contour-and-straighten-a-nearly-rectangular-image
 
 %% 1. Get rid of the white border
+I = image;
 I2 = imclearborder(im2bw(I));
 %% 2. Find each of the four corners
 [y,x] = find(I2);

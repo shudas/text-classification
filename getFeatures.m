@@ -1,4 +1,4 @@
-function [ feats, labels_mat ] = getFeatures( docs, labels )
+function [ feats, labels_mat ] = getFeatures( docs )
 addpath('libraries/strnearest/');
 %getFeatures Creates features from the given data. 
 %   docs should be a cell array of cell arrays. The inner cell array is a
@@ -24,8 +24,6 @@ for i=1:length(docs)
         feats(offset + j, 2) = checkDayExpr(docs{i}{j});
     end
 end
-
-labels_mat = convertLabels(labels);
 
 end
 
@@ -119,17 +117,17 @@ function [ weight ] = checkDayExpr(val_to_check)
     end
 end
 
-function[ labels_mat ] = convertLabels(labels_cell)
-%     MAX_LINES = max(cellfun(@length, labels_cell));
-    MAX_LINES = sum(cellfun(@length, labels_cell));
-%     labels_mat = zeros(length(labels_cell), MAX_LINES);
-    labels_mat = zeros(MAX_LINES, 1);
-    for i=1:length(labels_cell)
-        offset = 0;
-        if (i > 1)
-            offset = sum(cellfun(@length, labels_cell(1:i-1)));
-        end
-        labels_mat(offset + 1:offset + length(labels_cell{i})) = labels_cell{i} + 1;
-%         labels_mat(i, 1:length(labels_cell{i})) = labels_cell{i};
-    end
-end
+% function[ labels_mat ] = convertLabels(labels_cell)
+% %     MAX_LINES = max(cellfun(@length, labels_cell));
+%     MAX_LINES = sum(cellfun(@length, labels_cell));
+% %     labels_mat = zeros(length(labels_cell), MAX_LINES);
+%     labels_mat = zeros(MAX_LINES, 1);
+%     for i=1:length(labels_cell)
+%         offset = 0;
+%         if (i > 1)
+%             offset = sum(cellfun(@length, labels_cell(1:i-1)));
+%         end
+%         labels_mat(offset + 1:offset + length(labels_cell{i})) = labels_cell{i} + 1;
+% %         labels_mat(i, 1:length(labels_cell{i})) = labels_cell{i};
+%     end
+% end

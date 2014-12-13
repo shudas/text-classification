@@ -6,11 +6,12 @@ if (size(img, 3) == 3)
 end
 % flatImg = double(reshape(img,size(img,1)*size(img,2),size(img,3)));
 ab = double(reshape(img, size(img,1)*size(img,2),size(img,3)));
-[idx, mu] = kmeans(ab, 2, 'Start', [0;1]);
-% [idx, mu] = kmeans(ab, K, 'Start', init);
+% [idx, mu] = kmeans(ab, 2, 'Start', [0;1]);
+[idx, mu] = kmeans(ab, K);
 
 assign = reshape(idx,size(img,1),size(img,2));
-reducedImage = mat2gray(assign);
+reducedImage = assign;
+% reducedImage = mat2gray(assign);
 
 end
 

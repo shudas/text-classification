@@ -2,7 +2,7 @@
 %labelFolder is the name of the folder containing the labels
 %assumes docs and corresponding labels files are in the same order
 %each file must end with an empty line
-function[docs labels] = readFiles(docFolder, labelFolder)
+function[docs, labels] = readFiles(docFolder, labelFolder)
 
 docNames = dir(docFolder);
 labelNames = dir(labelFolder);
@@ -13,7 +13,7 @@ labels = {};
 counter = 1;
 
 for i = 1:length(docNames)
-    if length(strfind(docNames(i).name, '.txt')) > 0
+    if ~isempty(strfind(docNames(i).name, '.txt'))
         fd = fopen(strcat(docFolder,'/',docNames(i).name));
         fl = fopen(strcat(labelFolder,'/',labelNames(i).name));
         txt = textscan(fd, '%s', 'delimiter', '\n');
