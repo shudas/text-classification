@@ -1,5 +1,5 @@
-function [ words, pred ] = classify( img, mnrfitParams )
-%UNTITLED classifies the text in rgbImg image using the multinomial fit
+function [ words, pred ] = classifyMultinomial( img, mnrfitParams )
+%classifyMultinomial classifies the text in rgbImg image using the multinomial fit
 %parameters provided. Returns the words from the document and the associated labels
 %   mnrfitParams should have been obtained using the same set of features
 %   that will be extracted from the image.
