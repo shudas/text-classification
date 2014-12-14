@@ -45,12 +45,33 @@ for i = 1:num_to_generate
     doc = cell(docLines, 1);
 %     generate lines of text
     for j = 1:docLines
-       numWords = randi([MIN_WORDS_PER_LINE, MAX_WORDS_PER_LINE]);
-       wordIndices = randperm(length(dict{1}), numWords);
-       doc{j} = strjoin(dict{1}(wordIndices)');
+        numWords = randi([MIN_WORDS_PER_LINE, MAX_WORDS_PER_LINE]);
+        wordIndices = randperm(length(dict{1}), numWords);
+        line = strjoin(dict{1}(wordIndices)');
+%         add some noise to the line
+        if (rand() < 0.4)
+            line = addTextNoise(line, 1 / 8, 1 / 8);
+        end
+        doc{j} = line;
     end
-%     put random numbers in the document to make it more realistic
-
+    
+    % generate line where phone number is
+    phoneLine = randi(docLines + 4);
+    
+    % not all flyers will include phone line
+    if (phoneLine <= docLines)
+%         somtimes replace entire line but other times insert into line
+        if (rand() < 0.5)
+            doc{phoneLine} = generatePhoneNumber();
+        else
+            insertLoc = randi(length(doc{phoneLine}));
+            doc{phoneLine} = char(strcat(doc{phoneLine}(1:insertLoc), {' '}, ...
+            generatePhoneNumber(), {' '}, doc{phoneLine}(insertLoc+1:end)));
+        end
+        
+    end
+%     location = generateLocation();
+%     doc{randi(docLines)} = location;
 %     populate doc with random date and time
     date = generateDate();
     time = generateTime();
@@ -71,10 +92,10 @@ for i = 1:num_to_generate
 %         3 means both date and time
         label(dateTimeLines(1)) = 3;
     end
+    
     docs{i} = doc;
     labels{i} = label;
 end
-
 end
 
 function [ date ] = generateDate( )
@@ -103,3 +124,62 @@ function [ time ] = generateTime( )
     end
 end
 
+function [ phone ] = generatePhoneNumber( )
+
+    typeChoice = randi(16);
+    if (typeChoice >= 7)
+        generatedType = 'NPA';
+    elseif (typeChoice >= 4)
+        generatedType = 'EXTEND';
+    else
+        generatedType = 'NONE';
+    end
+        
+    otherChoice = randi(64);
+    if (otherChoice >= 60)
+        phone = randomPhone(generatedType, 'TRUE', 'DASH');
+    elseif (otherChoice >= 54)
+        phone = randomPhone(generatedType, 'TRUE', 'END_DASH');
+    elseif (otherChoice >= 50)
+        phone = randomPhone(generatedType, 'TRUE', 'SPACE');
+    elseif (otherChoice >= 48)
+        phone = randomPhone(generatedType, 'TRUE', 'NONE');
+    elseif (otherChoice >= 42)
+        phone = randomPhone(generatedType, 'TRUE', 'SPACED_DASH');
+    elseif (otherChoice >= 37)
+        phone = randomPhone(generatedType, 'FALSE', 'DASH');
+    elseif (otherChoice >= 33)
+        phone = randomPhone(generatedType, 'FALSE', 'END_DASH');
+    elseif (otherChoice >= 30)
+        phone = randomPhone(generatedType, 'FALSE', 'PERIOD');
+    elseif (otherChoice >= 26)
+        phone = randomPhone(generatedType, 'FALSE', 'SPACE');
+    elseif (otherChoice >= 23)
+        phone = randomPhone(generatedType, 'FALSE', 'NONE');
+    elseif (otherChoice >= 19)
+        phone = randomPhone(generatedType, 'FALSE', 'SPACED_DASH');
+    elseif (otherChoice >= 17)
+        phone = randomPhone(generatedType, 'FALSE', 'SLASH');
+    elseif (otherChoice >= 15)
+        phone = randomPhone(generatedType, 'SPACED', 'DASH');
+    elseif (otherChoice >= 9)
+        phone = randomPhone(generatedType, 'SPACED', 'END_DASH');
+    elseif (otherChoice >= 5)
+        phone = randomPhone(generatedType, 'SPACED', 'SPACE');
+    else
+        phone = randomPhone(generatedType, 'SPACED', 'SPACED_DASH');
+    end
+end
+
+function [ location ] = generateLocation( )
+%   n = road number, R = road, e = road ending
+%   b = building type, N = building number
+%   c = city, S = state, Z = zipcode
+    combs = ['nRe', 'bN'];
+    choice = randi(16);
+    if (choice > 8)
+        location = randomLocation('nRe');
+    else 
+        location = randomLocation('bN');
+    end
+end
