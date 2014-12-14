@@ -6,7 +6,7 @@ function [ mnrparams ] = trainMultinomial( trainSize )
 
 [traindocs, traindocs_label] = generateData(trainSize);
 feats = getFeatures(traindocs);
-l = convertLabels(traindocs_label);
+trainLabels = convertLabels(traindocs_label);
 mnrparams = mnrfit(feats, trainLabels);
 
 end

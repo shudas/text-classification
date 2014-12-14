@@ -49,6 +49,8 @@ for i = 1:num_to_generate
        wordIndices = randperm(length(dict{1}), numWords);
        doc{j} = strjoin(dict{1}(wordIndices)');
     end
+%     put random numbers in the document to make it more realistic
+
 %     populate doc with random date and time
     date = generateDate();
     time = generateTime();

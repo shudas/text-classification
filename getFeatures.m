@@ -1,4 +1,4 @@
-function [ feats, labels_mat ] = getFeatures( docs )
+function [ feats ] = getFeatures( docs )
 addpath('libraries/strnearest/');
 %getFeatures Creates features from the given data. 
 %   docs should be a cell array of cell arrays. The inner cell array is a
