@@ -1,0 +1,63 @@
+EECS
+BBB
+Dow
+The Dude
+Duderstadt Library
+The Ugli
+Undergraduate Library
+Haven
+Mason
+Angell
+Art Museum
+Hatcher
+Grad Library
+Chrysler
+Stamps
+IOE
+IOE Building
+Pheonix
+Cooley
+Cooley Labs
+Pierpont
+The League
+The Union
+Tisch
+Dana
+East Hall
+East Quad
+South Hall
+South Quad
+North Hall
+North Quad
+West Hall
+West Quad
+Baits I
+Baits II
+Space Research Building
+LBME
+SRB
+FXB
+Markley
+Mojo
+Stockwell
+Alice Lloyd
+Dental School
+CC Little
+Dennison
+Chem
+Environmental Science
+Randall Lab
+Burton Tower
+Bursley
+Northwood
+Music Building
+MLB
+Hill Auditorium
+Barber
+Martha Cook
+LSA Building
+NCRB
+CCRB
+IM Building
+Fletcher
+Revelli

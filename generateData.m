@@ -23,10 +23,20 @@ MAX_WORDS_PER_LINE = 10;
 
 DATE_TIME_SEP = {'   ', ' @ ', ' | '};
 
-% open up dictionary of words for filler text
-dictFile = fopen('dictionary.txt', 'r');
-dict = textscan(dictFile, '%s');
-fclose(dictFile);
+% open up dictionary of words, streets, and buildings for filler text
+fileId = fopen('dictionary.txt', 'r');
+dict = textscan(fileId, '%s');
+fclose(fileId);
+fileId = fopen('streetNames.txt', 'r');
+global STREETS;
+STREETS = textscan(fileId, '%s', 'Delimiter', '\n');
+STREETS = STREETS{1};
+fclose(fileId);
+fileId = fopen('buildingNames.txt', 'r');
+global BUILDINGS;
+BUILDINGS = textscan(fileId, '%s', 'Delimiter', '\n');
+BUILDINGS = BUILDINGS{1};
+fclose(fileId);
 
 docs = cell(num_to_generate, 1);
 labels = cell(num_to_generate, 1);
@@ -70,8 +80,8 @@ for i = 1:num_to_generate
         end
         
     end
-%     location = generateLocation();
-%     doc{randi(docLines)} = location;
+    location = generateLocation();
+    doc{randi(docLines)} = location;
 %     populate doc with random date and time
     date = generateDate();
     time = generateTime();
@@ -175,11 +185,13 @@ function [ location ] = generateLocation( )
 %   n = road number, R = road, e = road ending
 %   b = building type, N = building number
 %   c = city, S = state, Z = zipcode
+    global STREETS;
+    global BUILDINGS;
     combs = ['nRe', 'bN'];
     choice = randi(16);
     if (choice > 8)
-        location = randomLocation('nRe');
+        location = randomLocation('nRe', STREETS, BUILDINGS);
     else 
-        location = randomLocation('bN');
+        location = randomLocation('bN', STREETS, BUILDINGS);
     end
 end

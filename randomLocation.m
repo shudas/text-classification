@@ -1,4 +1,4 @@
-function [ location ] = randomLocation( location_params )
+function [ location ] = randomLocation( location_params, streetNames, buildingNames )
 %randomLocation generates a random location string given the desired type 
 %of location. location_params is a string containing either a simple street
 %address (street name and number) or a building name with a room number
@@ -50,17 +50,17 @@ if (~isempty(roadNumberType))
 end
 road = '';
 if (~isempty(roadType))
-    streetNames = cell(91670,1);
-    fileID = fopen('streetNames.txt','r');
-    i = 1;
-    tline = fgetl(fileID);
-    while ischar(tline)
-        streetNames{i} = tline;
-        i = i+1;
-        tline = fgetl(fileID);
-    end
-    fclose(fileID);
-    road = streetNames(randi(91670),1);
+%     streetNames = cell(91670,1);
+%     streets = fopen('streetNames.txt','r');
+%     i = 1;
+%     tline = fgetl(streets);
+%     while ischar(tline)
+%         streetNames{i} = tline;
+%         i = i+1;
+%         tline = fgetl(streets);
+%     end
+%     fclose(streets);
+    road = streetNames(randi(length(streetNames)),1);
     road = strcat(road, {' '});
 end
 ending = '';
@@ -74,17 +74,17 @@ end
 
 building = '';
 if (~isempty(buildingType))
-    buildingNames = cell(50,1);
-    fileID = fopen('buildingNames.txt','r');
-    i = 1;
-    tline = fgetl(fileID);
-    while ischar(tline)
-        buildingNames{i} = tline;
-        i = i+1;
-        tline = fgetl(fileID);
-    end
-    fclose(fileID);
-    road = buildingNames(randi(50),1);
+%     buildingNames = cell(50,1);
+%     builds = fopen('buildingNames.txt','r');
+%     i = 1;
+%     tline = fgetl(builds);
+%     while ischar(tline)
+%         buildingNames{i} = tline;
+%         i = i+1;
+%         tline = fgetl(builds);
+%     end
+%     fclose(builds);
+    road = buildingNames(randi(length(buildingNames)),1);
     building = strcat(building, {' '});
 end
 buildingNumber = '';

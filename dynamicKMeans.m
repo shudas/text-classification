@@ -42,12 +42,6 @@ for i = 1:size(inputRGB, 1)
                 + currPoint) / (numPerMu(bestCluster) + 1);
             numPerMu(bestCluster) = numPerMu(bestCluster) + 1;
         end
-        if (i == 742 && j == 492)
-            currPoint
-            bestCluster
-            size(mus, 1)
-            indices(i,j)
-        end
     end
 end
 
