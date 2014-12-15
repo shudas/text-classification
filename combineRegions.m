@@ -16,9 +16,11 @@ if (onWords == 1)
     %     add word for new line
         if (length(connWords) < connIdx)
             connWords(connIdx) = words(i);
+            combBoxes(connIdx, :) = boxes(i, :);
         end
         if (containsEachOther(boxes(i, :), boxes(i + 1, :), maxWidth))
             connWords(connIdx) = strcat(connWords(connIdx), {' '}, words(i+1));
+            combBoxes(connIdx, :) = combineBoxes(combBoxes(connIdx,:), boxes(i + 1,:));
         elseif (length(connWords) == connIdx)
             connIdx = connIdx + 1;
         end

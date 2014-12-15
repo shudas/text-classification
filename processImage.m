@@ -1,4 +1,4 @@
-function [ words ] = processImage( img )
+function [ words, boxes ] = processImage( img )
 %processImg Runs ocr and post processing on img. Returns a cell array of
 %the extracted words
 
@@ -20,8 +20,9 @@ usedWords = strtrim(usedWords);
 nonEmpty = ~cellfun('isempty', usedWords);
 usedWords = usedWords(nonEmpty);
 usedBoxes = usedBoxes(nonEmpty, :);
-words = combineRegions(usedWords, usedBoxes, ...
-    size(img, 2), size(img, 1), 1)';
+[words, boxes] = combineRegions(usedWords, usedBoxes, ...
+    size(img, 2), size(img, 1), 1);
+words = words';
 
 end
 

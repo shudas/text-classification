@@ -78,9 +78,16 @@ for i = 1:num_to_generate
             doc{phoneLine} = char(strcat(doc{phoneLine}(1:insertLoc), {' '}, ...
             generatePhoneNumber(), {' '}, doc{phoneLine}(insertLoc+1:end)));
         end
-        
+%         add some nosie sometimes
+        if (rand() < 0.4)
+            doc{phoneLine} = addTextNoise(doc{phoneLine}, 0, 1/6);
+        end
     end
     location = generateLocation();
+%     add noise sometimes
+    if (rand() < 0.4)
+        location = addTextNoise(location, 0, 1/6);
+    end
     doc{randi(docLines)} = location;
 %     populate doc with random date and time
     date = generateDate();
