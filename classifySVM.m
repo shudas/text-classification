@@ -5,6 +5,8 @@ function [ pred, words, boxes ] = classifySVM( img, svmParams )
 [words, boxes] = processImage(img);
 feats = getFeatures({words});
 % add the height proportion of each box compared to other boxes as another feat
+feats = horzcat(feats, boxes(:,1) / size(images, 2));
+feats = horzcat(feats, boxes(:,2) / size(images, 1));
 feats = horzcat(feats, boxes(:,4) / mean(boxes(:,4)));
 
 pred = [];
