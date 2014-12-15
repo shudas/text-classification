@@ -24,13 +24,6 @@ else
         runImagesSVM(true);
     end
 end
-    
-%     go through all images and run multinomial regression
-cd 'data/';
-files = dir('*.jpg');
-files = vertcat(files, dir('*.png'));
-files = vertcat(files, dir('*.jpeg'));
-cd ..;
 
 workingImages = {'flyer010.jpg', 'flyer018.png', 'flyer020.jpg', 'flyer028.jpg', 'flyer029.jpg', 'flyer032.jpg', 'flyer034.jpg', 'flyer035.jpg'};
 
@@ -38,12 +31,10 @@ allPred = {};
 allWords = {};
 allBoxes = {};
 for i=1:length(workingImages)
-%     file = files(i).name
     file = workingImages{i};
     img = '';
     try
         img = imread(strcat('data/', file));
-        
     catch
         continue;
     end
