@@ -22,6 +22,7 @@ for i=1:length(docs)
 %         feats(i,j,3) = checkTimeExpr(docs{i}{j});
         feats(offset + j, 1) = checkTimeExpr(docs{i}{j});
         feats(offset + j, 2) = checkDayExpr(docs{i}{j});
+        feats(offset + j, 3) = length(allwords(docs{i}{j}));
     end
 end
 
