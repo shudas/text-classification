@@ -1,11 +1,14 @@
 function [ pred, words, boxes ] = classifyMultinomial( img, mnrfitParams )
-%classifyMultinomial classifies the text in rgbImg image using the multinomial fit
-%parameters provided. Returns the words from the document and the associated labels
+%classifyMultinomial classifies the text in img using the multinomial fit
+%parameters provided. Returns the labels and the words in the document
 %   mnrfitParams should have been obtained using the same set of features
 %   that will be extracted from the image.
 
 [words, boxes] = processImage(img);
 feats = getFeatures({words});
+% add the height proportion of each box compared to other boxes as another feat
+feats = horzcat(feats, boxes(:,4) / mean(boxes(:,4)));
+
 pred = mnrval(mnrfitParams, feats);
 [~, pred] = max(pred, [], 2);
 

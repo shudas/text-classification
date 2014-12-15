@@ -4,6 +4,8 @@ function [ pred, words, boxes ] = classifySVM( img, svmParams )
 %   represents the information for one label vs all other labels.
 [words, boxes] = processImage(img);
 feats = getFeatures({words});
+% add the height proportion of each box compared to other boxes as another feat
+feats = horzcat(feats, boxes(:,4) / mean(boxes(:,4)));
 
 pred = [];
 for i=1:length(svmParams)
