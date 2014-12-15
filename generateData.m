@@ -1,10 +1,16 @@
-function [ docs, labels ] = generateData( num_to_generate )
+function [ docs, labels, line_dimens] = generateData( num_to_generate )
 %generateData Generates fake text with date and time strings inside the
 %text.
 %   Generates num_to_generate arrays of text. Each array can be thought of
 %   as a document with variable number of lines. Each document contains one
 %   date field and may also contain a time field. The remaining text will
 %   be random.
+
+%line_dimens is a num_to_generate x 3 vector containing the box x value, y
+%value, and height as ratios. x value is calculated as (x pixel
+%value)/(total image pixel width). y value is calculated as (y pixel
+%value)/(total image pixel height). height value is calculated as (box height
+%value)/(average box height value for document)
 
 % num_to_generate must be at least 1 and an integer
 num_to_generate = round(num_to_generate);
@@ -40,6 +46,7 @@ fclose(fileId);
 
 docs = cell(num_to_generate, 1);
 labels = cell(num_to_generate, 1);
+line_dimens = cell(num_to_generate, 1);
 
 % use different rand num gen every time
 rng('shuffle');
@@ -53,6 +60,7 @@ for i = 1:num_to_generate
         docLines = randi([MIN_OPTIMAL_LINES, MAX_OPTIMAL_LINES]);
     end
     doc = cell(docLines, 1);
+    importantDocLines = nan(4,1);
 %     generate lines of text
     for j = 1:docLines
         numWords = randi([MIN_WORDS_PER_LINE, MAX_WORDS_PER_LINE]);
@@ -70,6 +78,7 @@ for i = 1:num_to_generate
     
     % not all flyers will include phone line
     if (phoneLine <= docLines)
+        importantDocLines(1,1) = phoneLine;
 %         somtimes replace entire line but other times insert into line
         if (rand() < 0.5)
             doc{phoneLine} = generatePhoneNumber();
@@ -88,30 +97,95 @@ for i = 1:num_to_generate
     if (rand() < 0.4)
         location = addTextNoise(location, 0, 1/6);
     end
-    doc{randi(docLines)} = location;
+    locationLine = randi(docLines);
+    if (~isnan(importantDocLines(1,1)))
+        while (locationLine == importantDocLines(1,1))
+            locationLine = randi(docLines);
+        end
+    end
+    doc{locationLine} = location;
+    importantDocLines(2,1) = locationLine;
 %     populate doc with random date and time
     date = generateDate();
     time = generateTime();
-    dateTimeLines = [];
     label = zeros(docLines, 1);
 %     some times, separate date and time into different spots
     if (randi(2) == 1 && docLines > 10)
 %         select random lines for date and time locations
-        dateTimeLines = randperm(docLines, 2);
-        doc{dateTimeLines(1)} = date;
-        doc{dateTimeLines(2)} = time;
+        dateLine = randi(docLines);
+        while (any(importantDocLines == dateLine))
+            dateLine = randi(docLines);
+        end
+        importantDocLines(3,1) = dateLine;
+        timeLine = randi(docLines);
+        while (any(importantDocLines == timeLine))
+            timeLine = randi(docLines);
+        end
+        importantDocLines(4,1) = timeLine;
+%        add some noise to the line
+        if (rand() < 0.1 && length(date) > 8)
+            date = addTextNoise(date, 0, 1 / 16);
+        end
+        doc{dateLine} = date;
+        doc{timeLine} = time;
 %         1 means date label 2 means time label
-        label(dateTimeLines(1)) = 1;
-        label(dateTimeLines(2)) = 2;
+        label(dateLine) = 1;
+        label(timeLine) = 2;
     else
-        dateTimeLines = repmat(randi(docLines), 1, 2);
-        doc{dateTimeLines(1)} = char(strcat(date, {DATE_TIME_SEP{randi(length(DATE_TIME_SEP))}}, time));
+        dateTimeLines = randi(docLines);
+        while (any(importantDocLines == dateTimeLines))
+            dateTimeLines = randi(docLines);
+        end
+        dateTime = char(strcat(date, {DATE_TIME_SEP{randi(length(DATE_TIME_SEP))}}, time));
+%        add some noise to the line
+        if (rand() < 0.1)
+            i
+            dateTime = addTextNoise(dateTime, 0, 1 / 16);
+        end
+        doc{dateTimeLines} = dateTime;
 %         3 means both date and time
-        label(dateTimeLines(1)) = 3;
+        label(dateTimeLines) = 3;
+        importantDocLines(3,1) = dateTimeLines;
     end
+    
+    k = 1;
+    titleLine = randi(floor(docLines/2));
+    while (any(importantDocLines == titleLine))
+        if(k == 30)
+            titleLine = 1;
+        else
+            titleLine = randi(floor(docLines/2));
+            k = k+1;
+        end
+    end
+    numWords = randi(6);
+    wordIndices = randperm(length(dict{1}), numWords);
+    title = strjoin(dict{1}(wordIndices)');
+%    add some noise to the line
+    if (rand() < 0.3)
+        title = addTextNoise(title, 1 / 8, 1 / 8);
+    end
+    doc{titleLine} = title;
+%    4 means title
+    label(titleLine) = 4;
+    
+    line_height = zeros(docLines, 1);
+    [title_height, other_line_heights] = generateLineHeights(docLines);
+    k = 1;
+    for j = 1:docLines
+        if (j == titleLine)
+            line_height(j) = title_height;
+        else
+            line_height(j) = other_line_heights(k,1);
+            k = k+1;
+        end
+    end
+    
+    [line_x, line_y] = generateImageLocation(doc, line_height);
     
     docs{i} = doc;
     labels{i} = label;
+    line_dimens{i} = [line_x, line_y, line_height];
 end
 end
 
@@ -201,4 +275,38 @@ function [ location ] = generateLocation( )
     else 
         location = randomLocation('bN', STREETS, BUILDINGS);
     end
+end
+
+function [ imageX, imageY ] = generateImageLocation( doc, line_height )
+    imageX = zeros(size(doc,1), 1);
+    imageY = zeros(size(doc,1), 1);
+    choice = randi(16);
+    imLong = randi([640,2806]);
+    imShort = randi([400, imLong - 128]);
+    imageSize = [0 0];
+    if(choice > 3)
+        imageSize = [imShort imLong];
+    elseif (choice > 1)
+        imageSize = [imLong imShort];
+    else
+        imageSize = [imShort imShort];
+    end
+    maxLength = 0;
+    for i = 1:size(doc,1)
+        if(length(doc{i}) > maxLength)
+            maxLength = length(doc{i});
+        end
+    end
+    pixelsPerCharWidth = floor((imageSize(1) - 64)/maxLength);
+    pixelsPerCharHeight = floor((imageSize(2) - 64)/size(doc,1));
+    for i = 1:size(doc,1)
+        center = [imageSize(1)/2; imageSize(2)*1/4];
+        sigma = [imageSize(1)/6 imageSize(2)/12];
+        boxWidth = length(doc{i}) * pixelsPerCharWidth;
+        boxHeight = floor(line_height(i,1) * pixelsPerCharHeight);
+        boxSize = [boxWidth boxHeight];
+        [imageX(i,1), imageY(i,1)] = randomImageLocation(center, sigma, imageSize, boxSize);
+    end
+    imageX = imageX ./ imageSize(1);
+    imageY = imageY ./ imageSize(2);
 end

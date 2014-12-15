@@ -11,7 +11,7 @@ center = [imageSize(1)/2; imageSize(2)*3/4];
 sigma = [1; 1.5];
 for i=1:testSize
     boxSize = [normrnd(4, 1); normrnd(1, 0.1)];
-    [xt, yt, c] = random_location(center, sigma, imageSize, boxSize);
+    [xt, yt, c] = randomImageLocation(center, sigma, imageSize, boxSize);
             
     if c
         edgeColor = [0 1 0];
